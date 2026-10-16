@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D version="3.0" profile="Immersive" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance" xsd:noNamespaceSchemaLocation="http://www.web3d.org/specifications/x3d-3.0.xsd">
+	<head>
+		<meta name="filename" content="29-1.x3d" />
+		<meta name="generator" content="skp2x3d.py --mode assembly (DEF/USE from the SketchUp components)" />
+		<meta name="source" content="skp_模型/skp_模型/29_圖樣二十九/29-1 殿閣身地盤九間身內分心枓底槽.skp (made to match the STL)" />
+	</head>
+	<Scene>
+		<Transform DEF="SketchUp_TRANSFORM"
+		           translation="0.000000 0.000000 0.000000"
+		           scale="0.025400 0.025400 0.025400"
+		           rotation="-1.000000 0.000000 0.000000 1.570796"
+		           >
+			<Transform translation="102.362206 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape DEF="c2">
+					<Appearance DEF="wood">
+						<Material diffuseColor="0.784 0.659 0.502" />
+					</Appearance>
+					<IndexedFaceSet solid="true" normalPerVertex="false"
+					                coordIndex="1 2 0 -1 2 1 3 -1 2 3 4 -1 4 3 5 -1 4 5 6 -1 6 5 7 -1 6 7 8 -1 8 7 9 -1 8 9 10 -1 10 9 11 -1 10 11 12 -1 12 11 13 -1 12 13 14 -1 14 13 15 -1 14 15 16 -1 16 15 17 -1 16 17 18 -1 18 17 19 -1 18 19 20 -1 20 19 21 -1 20 21 22 -1 22 21 23 -1"
+					                normalIndex="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0">
+						<Coordinate point="0 3.937 0 0.1342 2.918 0 0.1342 4.956 0 0.5275 1.9685 0 0.5275 5.9055 0 1.1531 1.1531 0 1.1531 6.7209 0 1.9685 0.5275 0 1.9685 7.3466 0 2.918 0.1342 0 2.918 7.7399 0 3.937 0 0 3.937 7.874 0 4.956 0.1342 0 4.956 7.7399 0 5.9055 0.5275 0 5.9055 7.3466 0 6.7209 1.1531 0 6.7209 6.7209 0 7.3466 1.9685 0 7.3466 5.9055 0 7.7399 2.918 0 7.7399 4.956 0 7.874 3.937 0" />
+						<Normal vector="0 0 1" />
+					</IndexedFaceSet>
+				</Shape>
+			</Transform>
+			<Transform translation="343.441239 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="299.2126 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="3.93701 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="167.979004 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="233.595802 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="-237.007872 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="-192.913384 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="-127.296586 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="-61.679788 -211.542723 0" rotation="0 0 1 3.141593">
+				<Shape USE="c2"/>
+			</Transform>
+			<Transform translation="102.362206 0 0">
+				<Shape DEF="c2m">
+					<Appearance USE="wood"/>
+					<IndexedFaceSet solid="true" normalPerVertex="false"
+					                coordIndex="23 22 21 -1 19 21 22 -1 20 19 22 -1 17 19 20 -1 18 17 20 -1 15 17 18 -1 16 15 18 -1 13 15 16 -1 14 13 16 -1 11 13 14 -1 12 11 14 -1 9 11 12 -1 10 9 12 -1 7 9 10 -1 8 7 10 -1 5 7 8 -1 6 5 8 -1 3 5 6 -1 4 3 6 -1 1 3 4 -1 2 1 4 -1 0 1 2 -1"
+					                normalIndex="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0">
+						<Coordinate point="-7.874 3.937 0 -7.7399 2.918 0 -7.7399 4.956 0 -7.3466 1.9685 0 -7.3466 5.9055 0 -6.7209 1.1531 0 -6.7209 6.7209 0 -5.9055 0.5275 0 -5.9055 7.3466 0 -4.956 0.1342 0 -4.956 7.7399 0 -3.937 0 0 -3.937 7.874 0 -2.918 0.1342 0 -2.918 7.7399 0 -1.9685 0.5275 0 -1.9685 7.3466 0 -1.1531 1.1531 0 -1.1531 6.7209 0 -0.5275 1.9685 0 -0.5275 5.9055 0 -0.1342 2.918 0 -0.1342 4.956 0 0 3.937 0" />
+						<Normal vector="0 0 1" />
+					</IndexedFaceSet>
+				</Shape>
+			</Transform>
+			<Transform translation="-237.007872 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="102.362206 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-61.679788 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-127.296586 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-192.913384 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="233.595802 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="167.979004 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="3.93701 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="299.2126 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 -109.84252 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-61.679788 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-127.296586 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-192.913384 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-237.007872 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="233.595802 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="167.979004 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="3.93701 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 -175.456401 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="167.979004 -175.456401 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-61.679788 -175.456401 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 -175.456401 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-237.007872 -175.456401 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="299.2126 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 0 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-237.007872 -44.094489 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="-61.679788 -44.094489 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="167.979004 -44.094489 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Transform translation="343.441239 -44.094489 0">
+				<Shape USE="c2m"/>
+			</Transform>
+			<Shape>
+				<Appearance USE="wood"/>
+				<IndexedFaceSet solid="true" normalPerVertex="false"
+				                coordIndex="3 6 2 -1 6 3 7 -1 3 0 1 -1 0 3 2 -1 5 0 4 -1 0 5 1 -1 6 5 4 -1 5 6 7 -1 6 0 2 -1 0 6 4 -1 5 3 1 -1 3 5 7 -1"
+				                normalIndex="4 4 0 0 1 1 5 5 2 2 3 3">
+					<Coordinate point="-240.9449 -215.4797 -3.937 -240.9449 -215.4797 0 -240.9449 3.937 -3.937 -240.9449 3.937 0 339.5803 -215.4797 -3.937 339.5803 -215.4797 0 339.5803 3.937 -3.937 339.5803 3.937 0" />
+					<Normal vector="-1 0 0 0 -1 0 0 0 -1 0 0 1 0 1 0 1 0 0" />
+				</IndexedFaceSet>
+			</Shape>
+		</Transform>
+	</Scene>
+</X3D>

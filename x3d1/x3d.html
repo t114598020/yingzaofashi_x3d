@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
+
 <head>
   <title>營造法式 大木作制度</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-  <link rel="stylesheet" href="https://www.x3dom.org/download/dev/x3dom.css" />
-  <script src="https://www.x3dom.org/download/dev/x3dom.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/x3dom@1.8.3/x3dom.css" />
+  <script src="https://cdn.jsdelivr.net/npm/x3dom@1.8.3/x3dom.js"></script>
+  <script src="./model_config.js"></script>
+  <script src="./model_skp/skp_models.js"></script>
+
+  <script>
+    // Fog exactly like THREE.Fog(color, near, far) in the STL pages: smoothstep on view depth.
+    // (x3dom's own linear fog fades from distance 0, three.js starts at `near`.)
+    // The normal pass passes the eye vector and the shadow pass the eye-space position,
+    // which differ in sign, hence abs().
+    (function () {
+      var cfg = window.MODEL_CONFIG[new URLSearchParams(window.location.search).get('model')];
+      var near = (cfg ? cfg.fog[1] : 2).toFixed(4);
+      x3dom.shader.fog = function () {
+        return 'uniform vec3  fogColor;\n' +
+          'uniform float fogType;\n' +
+          'uniform float fogRange;\n' +
+          'varying vec3 fragEyePosition;\n' +
+          'float calcFog(in vec3 eye) {\n' +
+          '   return 1.0 - smoothstep(' + near + ', fogRange, abs(eye.z));\n' +
+          '}\n';
+      };
+    })();
+  </script>
 
   <style>
     body {
       font-family: Monospace;
-      background-color: #72645b;
+      background-color: #000000;
       margin: 0px;
       overflow: hidden;
     }
@@ -26,12 +49,15 @@
       display: block;
     }
 
-    a { color: skyblue; }
+    a {
+      color: skyblue;
+    }
 
     x3d {
       width: 100vw;
       height: 100vh;
       display: block;
+      border: none;
     }
   </style>
 </head>
@@ -39,88 +65,88 @@
 <body>
   <div id="info">
     營造法式 大木作制度
-    <a xmlns:cc="http://creativecommons.org/ns#"
-       href="https://myweb.ntut.edu.tw/~tjhsieh/"
-       property="cc:attributionName"
-       rel="cc:attributionURL">
-      <img alt="創用 CC 授權條款" style="border-width:0" src="../CC-BY-NC-SA.svg" width="128"/>
+    <a xmlns:cc="http://creativecommons.org/ns#" href="https://myweb.ntut.edu.tw/~tjhsieh/"
+      property="cc:attributionName" rel="cc:attributionURL">
+      <img alt="創用 CC 授權條款" style="border-width:0" src="../CC-BY-NC-SA.svg" width="128" />
     </a>
   </div>
 
-  <x3d showStat="false" showLog="false">
+  <!--
+    The scene reproduces the three.js STL page (renderer.gammaInput/gammaOutput = true):
+    x3dom's "fastlinear" gamma is the same square / sqrt pair, so light and ground colours below are
+    the three.js values squared (linear), and light intensities are squared like three.js r66 does.
+  -->
+  <x3d id="x3d" showStat="false" showLog="false" showProgress="false">
     <scene>
-      <background skyColor="0.447 0.392 0.357"></background>
+      <!-- frustumCulling off: x3dom culls the zero-thickness ground plane by mistake -->
+      <environment gammaCorrectionDefault="fastlinear" frustumCulling="false"></environment>
 
-      <fog color="0.447 0.392 0.357" visibilityRange="13"></fog>
+      <background id="bg" skyColor="0.447 0.392 0.357"></background>
+      <fog id="fog" color="0.447 0.392 0.357" fogType="LINEAR" visibilityRange="15"></fog>
 
-      <navigationInfo type='"EXAMINE" "ANY"'
-                      headlight="false"
-                      reverseScroll="true">
-      </navigationInfo>
+      <!-- the camera is driven by script (same orbit as the STL page), so no mouse navigation -->
+      <navigationInfo type='"NONE"' headlight="false"></navigationInfo>
 
-      <viewpoint id="vp"
-                 position="0 0 4"
-                 centerOfRotation="0 0 0"
-                 fieldOfView="0.6108"
-                 description="主視角">
-      </viewpoint>
+      <viewpoint id="vp" position="3 0.15 3" fieldOfView="0.6109" zNear="1" zFar="15"></viewpoint>
 
-      <ambientLight color="0.467 0.467 0.467" intensity="1"></ambientLight>
-      <directionalLight direction="-1 -1 -1" color="1 1 1" intensity="1.35"></directionalLight>
-      <directionalLight direction="-0.5 -1 1" color="1 0.667 0" intensity="1"></directionalLight>
+      <!-- AmbientLight( 0x777777 ): 0.4667^2 -->
+      <directionalLight direction="0 -1 0" color="1 1 1" intensity="0" ambientIntensity="0.2178"></directionalLight>
+      <!-- addShadowedLight( 1, 1, 1, 0xffffff, 1.35 ) -->
+      <directionalLight direction="-1 -1 -1" color="1 1 1" intensity="1.8225"></directionalLight>
+      <!-- addShadowedLight( 0.5, 1, -1, 0xffaa00, 1 ) -->
+      <directionalLight direction="-0.5 -1 1" color="1 0.4444 0" intensity="1"></directionalLight>
+      <!-- (x3dom's own shadow maps are disabled on WebGL2 browsers, so shadows are drawn below) -->
 
-      <transform translation="0 -1 0">
+      <!--
+        Ground: PlaneGeometry( 40, 40 ) at y = groundY, MeshPhong 0x999999 / specular 0x101010,
+        drawn as a checkerboard (X3D only) so the floor reads better.
+        One quad with a 2 x 2 pixel texture repeated over it, each pixel one tile.
+        Tile size and colours come from GROUND in the script (applyGround() fills in the
+        texture and texture coordinates below; the values here are only the defaults).
+        The texture colour replaces the material's diffuse colour; NEAREST_PIXEL keeps the tile
+        edges sharp up close, mipmaps fade far tiles to an even grey instead of flickering.
+      -->
+      <transform id="ground" translation="0 -0.5 0">
         <shape>
           <appearance>
-            <material diffuseColor="0.6 0.6 0.6"
-                      specularColor="0.063 0.063 0.063"
-                      ambientIntensity="0.6"
-                      shininess="0.1">
-            </material>
+            <material diffuseColor="0.36 0.36 0.36" ambientIntensity="1" specularColor="0.0039 0.0039 0.0039"
+              shininess="0.2344"></material>
+            <pixelTexture image="2 2 3  0x999999 0x7a7a7a  0x7a7a7a 0x999999">
+              <textureProperties magnificationFilter="NEAREST_PIXEL" minificationFilter="AVG_PIXEL_AVG_MIPMAP"
+                generateMipMaps="true" boundaryModeS="REPEAT" boundaryModeT="REPEAT"></textureProperties>
+            </pixelTexture>
           </appearance>
-          <box size="40 0.01 40"></box>
+          <indexedFaceSet solid="true" coordIndex="0 1 2 3 -1" texCoordIndex="0 1 2 3 -1">
+            <coordinate point="-20 0 20  20 0 20  20 0 -20  -20 0 -20"></coordinate>
+            <textureCoordinate point="0 0  80 0  80 80  0 80"></textureCoordinate>
+          </indexedFaceSet>
         </shape>
       </transform>
 
-      <transform DEF="modelRotation">
-        <transform translation="0 0 0"
-                   rotation="1 0 0 -1.5708"
-                   scale="1 1 1">
-            <inline id="modelInline"
-                    url=""
-                    nameSpaceName="model"
-                    mapDEFToID="true">
-            </inline>
-
+      <!--
+        modelPlace = mesh.position / mesh.rotation / mesh.scale of the STL page.
+        modelUnit undoes the SketchUp export convention inside every .x3d
+        (scale 0.0254, -90deg about X), so the inline is back in STL coordinates.
+      -->
+      <transform id="modelPlace">
+        <transform id="modelUnit" rotation="1 0 0 1.5707963" scale="39.370079 39.370079 39.370079">
+          <inline id="modelInline" url="" nameSpaceName="model" mapDEFToID="true">
+          </inline>
         </transform>
       </transform>
 
-      <timeSensor DEF="time"
-                  cycleInterval="10"
-                  loop="true"
-                  enabled="true">
-      </timeSensor>
-
-      <orientationInterpolator DEF="rotator"
-                               key="0 0.25 0.5 0.75 1"
-                               keyValue="0 1 0 0,
-                                         0 1 0 1.5708,
-                                         0 1 0 3.1416,
-                                         0 1 0 4.7124,
-                                         0 1 0 6.2832">
-      </orientationInterpolator>
-
-      <ROUTE fromNode="time" fromField="fraction_changed"
-             toNode="rotator" toField="set_fraction"></ROUTE>
-      <ROUTE fromNode="rotator" fromField="value_changed"
-             toNode="modelRotation" toField="rotation"></ROUTE>
+      <!--
+        Ground shadows of the two shadow-casting lights, reproducing the STL page's shadow maps.
+        Filled by buildShadows(); see the comment above SHADOW_LIGHTS in the script.
+      -->
+      <group id="shadows"></group>
     </scene>
   </x3d>
 
   <script>
     const MODEL_WHITELIST = [
       '01-1', '01-2',
-      '02-1', '02-1-2', '02-1-3', '02-2', '02-3', '02-3-A', '02-4', '02-4-A', '02-5', '02-5-A', '02-6', '02-6-A',
+      '02-1', '02-1-1', '02-1-2', '02-1-3', '02-2', '02-3', '02-3-A', '02-4', '02-4-A', '02-5', '02-5-A', '02-6', '02-6-A',
       '03-1-1', '03-1-2', '03-2-1', '03-2-2', '03-2-3', '03-2-4', '03-3-1', '03-3-2', '03-4',
       '04-1', '04-2', '04-3',
       '05-1', '05-2', '05-3', '05-4', '05-5', '05-6',
@@ -138,7 +164,7 @@
       '17-1', '17-1-A',
       '18-1',
       '19-0', '19-1', '19-2', '19-3', '19-4', '19-5',
-      '20-1-1', '20-1-2', '20-3', '20-3-A',
+      '20-1-1', '20-1-2', '20-2', '20-3', '20-3-A',
       '21',
       '22-1', '22-2', '22-3',
       '23',
@@ -151,6 +177,7 @@
       '30',
       '31-1',
       '32',
+      '33',
       '34',
       '35',
       '36-1',
@@ -166,11 +193,55 @@
       '46-1', '46-2',
       '47-1', '47-2',
       '48-1', '48-2', '48-3',
-      '49'
+      '49',
+      '99_001'
     ];
 
-    const MODEL_BASE_PATH = './model/';
+    // ?src= picks the model folder: model_skp (default, DEF/USE from the SketchUp components),
+    // model (?src=stl, one mesh converted from the STL) or model_def (?src=def, DEF/USE found in the STL).
+    // Models without a file in the chosen folder use ./model/.
+    const MODEL_SOURCES = { stl: './model/', def: './model_def/', skp: './model_skp/' };
+    const MODEL_SOURCE = new URLSearchParams(window.location.search).get('src') || 'skp';
+
+    function modelFolder(modelName) {
+      if (MODEL_SOURCE === 'skp' && !(window.SKP_MODELS && window.SKP_MODELS[modelName])) return './model/';
+      if (MODEL_SOURCE === 'def' && !window.MODEL_CONFIG[modelName]) return './model/';
+      return MODEL_SOURCES[MODEL_SOURCE] || './model/';
+    }
     const MODEL_EXTENSION = '.x3d';
+
+    // Model surface (wood tone). Linear values: x3dom squares nothing, it only sqrt()s the output.
+    // Sky gradient (X3D only), from the horizon up: white -> light blue -> blue.
+    // skyAngle is measured from straight up (0) down to the horizon (pi/2 = 1.5708); there must be
+    // one more colour than angles (the first colour is straight up). The camera only sees about
+    // 10 degrees above the horizon (zenith angle ~1.40 to 1.57), so the change is placed there.
+    // The fog uses the horizon colour so the far ground fades into the sky.
+    const SKY = {
+      colors: [0x7fb0e0, 0x9bc2ea, 0xffffff],   // straight up, at angles[0], at angles[1] (horizon)
+      angles: [1.47, 1.61]
+    };
+
+    // Ground checkerboard (X3D only): tile size and the two tile colours (0x999999 is the STL page's
+    // ground). applyConfig() writes them into the ground's <pixelTexture> and texture coordinates,
+    // and the shadows use the same values.
+    const GROUND = {
+      size: 40,                          // PlaneGeometry( 40, 40 )
+      tile: 0.25,
+      colors: [0x999999, 0xa0bf93]
+    };
+
+    const MODEL_MATERIAL = {
+      diffuseColor: '0.32 0.235 0.115',
+      specularColor: '0.06 0.055 0.045',
+      shininess: '0.2',
+      ambientIntensity: '1'
+    };
+
+    // Used only for a whitelisted model that has no STL page (no entry in MODEL_CONFIG).
+    const DEFAULT_CONFIG = {
+      fov: 35, near: 1, far: 15, camY: 0.15, target: [0, -0.25, 0], orbit: 3, speed: 0.00025,
+      fog: [0x72645b, 2, 15], groundY: -0.5, position: null, rotation: [-Math.PI / 2, 0, 0], scale: null
+    };
 
     function getModelFromURL() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -179,6 +250,310 @@
 
     function isModelAllowed(modelName) {
       return MODEL_WHITELIST.includes(modelName);
+    }
+
+    // ---- small math helpers -------------------------------------------------------------------
+
+    // three.js Euler 'XYZ' (matrix = Rx * Ry * Rz) -> X3D axis-angle
+    function eulerXYZToAxisAngle(e) {
+      const cx = Math.cos(e[0] / 2), sx = Math.sin(e[0] / 2);
+      const cy = Math.cos(e[1] / 2), sy = Math.sin(e[1] / 2);
+      const cz = Math.cos(e[2] / 2), sz = Math.sin(e[2] / 2);
+      const q = [sx * cy * cz + cx * sy * sz,      // same formula as THREE.Quaternion.setFromEuler (XYZ)
+      cx * sy * cz - sx * cy * sz,
+      cx * cy * sz + sx * sy * cz,
+      cx * cy * cz - sx * sy * sz];
+      return quatToAxisAngle(q);
+    }
+
+    function quatToAxisAngle(q) {
+      if (q[3] < 0) q = q.map(function (v) { return -v; });
+      const s = Math.sqrt(1 - Math.min(1, q[3] * q[3]));
+      if (s < 1e-9) return '0 1 0 0';
+      return (q[0] / s) + ' ' + (q[1] / s) + ' ' + (q[2] / s) + ' ' + (2 * Math.acos(Math.min(1, q[3])));
+    }
+
+    // orientation for a camera at `eye` looking at `target` with +Y up (THREE camera.lookAt)
+    function lookAtOrientation(eye, target) {
+      let f = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]];
+      const fl = Math.hypot(f[0], f[1], f[2]); f = f.map(function (v) { return v / fl; });
+      let r = [-f[2], 0, f[0]];                                   // f x (0,1,0)
+      const rl = Math.hypot(r[0], r[1], r[2]); r = r.map(function (v) { return v / rl; });
+      const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+      // rotation matrix columns: r, u, -f
+      const m00 = r[0], m01 = u[0], m02 = -f[0];
+      const m10 = r[1], m11 = u[1], m12 = -f[1];
+      const m20 = r[2], m21 = u[2], m22 = -f[2];
+      const tr = m00 + m11 + m22;
+      let q;
+      if (tr > 0) {
+        const s = Math.sqrt(tr + 1) * 2;
+        q = [(m21 - m12) / s, (m02 - m20) / s, (m10 - m01) / s, s / 4];
+      } else if (m00 > m11 && m00 > m22) {
+        const s = Math.sqrt(1 + m00 - m11 - m22) * 2;
+        q = [s / 4, (m01 + m10) / s, (m02 + m20) / s, (m21 - m12) / s];
+      } else if (m11 > m22) {
+        const s = Math.sqrt(1 + m11 - m00 - m22) * 2;
+        q = [(m01 + m10) / s, s / 4, (m12 + m21) / s, (m02 - m20) / s];
+      } else {
+        const s = Math.sqrt(1 + m22 - m00 - m11) * 2;
+        q = [(m02 + m20) / s, (m12 + m21) / s, s / 4, (m10 - m01) / s];
+      }
+      return quatToAxisAngle(q);
+    }
+
+    function hexToRGB(hex) {
+      return [((hex >> 16) & 255) / 255, ((hex >> 8) & 255) / 255, (hex & 255) / 255].join(' ');
+    }
+
+    // ---- scene setup from the STL page's parameters --------------------------------------------
+
+    let cfg = DEFAULT_CONFIG;
+
+    function applyConfig() {
+      const bg = document.getElementById('bg');
+      bg.setAttribute('skyColor', SKY.colors.map(hexToRGB).join('  '));
+      bg.setAttribute('skyAngle', SKY.angles.join(' '));
+      document.getElementById('fog').setAttribute('color', hexToRGB(SKY.colors[SKY.colors.length - 1]));
+      document.getElementById('fog').setAttribute('visibilityRange', String(cfg.fog[2]));
+      document.getElementById('ground').setAttribute('translation', '0 ' + cfg.groundY + ' 0');
+      applyGround();
+
+      const vp = document.getElementById('vp');
+      vp.setAttribute('zNear', String(cfg.near));
+      vp.setAttribute('zFar', String(cfg.far));
+      updateFieldOfView();
+
+      const place = document.getElementById('modelPlace');
+      place.setAttribute('rotation', eulerXYZToAxisAngle(cfg.rotation));
+      if (cfg.position) place.setAttribute('translation', cfg.position.join(' '));
+      if (cfg.scale) place.setAttribute('scale', cfg.scale.join(' '));
+    }
+
+    // 2 x 2 pixel checker texture repeated so that one pixel = one tile
+    function applyGround() {
+      const hex = function (c) { return '0x' + c.toString(16).padStart(6, '0'); };
+      const a = hex(GROUND.colors[0]), b = hex(GROUND.colors[1]);
+      const repeat = GROUND.size / (2 * GROUND.tile);
+      document.querySelector('#ground pixelTexture, #ground pixeltexture')
+        .setAttribute('image', '2 2 3  ' + a + ' ' + b + '  ' + b + ' ' + a);
+      document.querySelector('#ground textureCoordinate, #ground texturecoordinate')
+        .setAttribute('point', '0 0  ' + repeat + ' 0  ' + repeat + ' ' + repeat + '  0 ' + repeat);
+    }
+
+    // THREE.PerspectiveCamera.fov is vertical; X3D fieldOfView applies to the smaller dimension.
+    function updateFieldOfView() {
+      const aspect = window.innerWidth / window.innerHeight;
+      let fov = cfg.fov * Math.PI / 180;
+      if (aspect < 1) fov = 2 * Math.atan(Math.tan(fov / 2) * aspect);
+      document.getElementById('vp').setAttribute('fieldOfView', String(fov));
+    }
+
+    // same camera path as render() in the STL page
+    function animate() {
+      const timer = Date.now() * cfg.speed;
+      const eye = [Math.cos(timer) * cfg.orbit, cfg.camY, Math.sin(timer) * cfg.orbit];
+      const vp = document.getElementById('vp');
+      vp.setAttribute('position', eye.join(' '));
+      vp.setAttribute('orientation', lookAtOrientation(eye, cfg.target));
+      requestAnimationFrame(animate);
+    }
+
+    // ---- model -----------------------------------------------------------------------------------
+
+    // wood-tone material on every shape of the loaded model
+    function styleModel() {
+      const inline = document.getElementById('modelInline');
+      inline.querySelectorAll('Appearance, appearance').forEach(function (app) {
+        if (app.hasAttribute('USE')) return;          // a reference to a DEF Appearance styled here too
+        let mat = app.querySelector('Material, material');
+        if (!mat) {
+          mat = document.createElement('Material');
+          app.appendChild(mat);
+        }
+        Object.keys(MODEL_MATERIAL).forEach(function (k) { mat.setAttribute(k, MODEL_MATERIAL[k]); });
+      });
+    }
+
+    // ---- shadows ---------------------------------------------------------------------------------
+    //
+    // The STL page lets two lights cast shadow maps onto the ground: addShadowedLight( x, y, z, ... )
+    // with shadowDarkness 0.15 and an orthographic shadow camera at the light, looking at the origin,
+    // 2 x 2 wide (d = 1), near 1, far 4. x3dom's own shadow maps are switched off on WebGL2 browsers,
+    // so here the model is drawn a second time with a shader that flattens it onto the ground along
+    // the light and applies the same shadow-camera tests per pixel:
+    //   occluder depth within [near, far], receiver inside the 2 x 2 window and nearer than far,
+    //   and only triangles whose winding faces the light (renderer.shadowMapCullFace = CullFaceBack
+    //   in the STL page). The models are solid="true", and a triangle flattened along the light
+    //   faces up (towards the camera) exactly when it faced the light, so back-face culling of the
+    //   flattened copy does this.
+    // Surviving pixels get the lit ground colour x (1 - shadowDarkness), then the page's fog.
+    // Both lights share one copy of the model (USE); the second copy sits 1000 below and the shader
+    // takes that as "light 2" and moves it back.
+
+    const SHADOW_LIGHTS = [[1, 1, 1], [0.5, 1, -1]];
+    const SHADOW_DARKNESS = 0.15;
+    const SHADOW_CAMERA = { half: 1, near: 1, far: 4 };
+    const LIGHT2_OFFSET = 1000;
+
+    // linear values used by the <directionalLight>s above
+    const AMBIENT = 0.2178;
+    const LIGHTS = [{ dir: [-1, -1, -1], color: [1, 1, 1], intensity: 1.8225 },
+    { dir: [-0.5, -1, 1], color: [1, 0.4444, 0], intensity: 1 }];
+
+    function norm(a) { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; }
+
+    // The ground is flat and the lights directional, so each tile colour is lit the same everywhere.
+    // Shadow colour of a tile = its lit colour x (1 - shadowDarkness), as output (after sqrt).
+    // The tile colour is a texture colour, which x3dom's fastlinear squares before lighting.
+    function shadowColor(tileHex) {
+      const ch = [(tileHex >> 16) & 255, (tileHex >> 8) & 255, tileHex & 255];
+      return [0, 1, 2].map(function (c) {
+        let lit = AMBIENT;
+        LIGHTS.forEach(function (l) { lit += l.color[c] * l.intensity * Math.max(0, -norm(l.dir)[1]); });
+        const diffuse = Math.pow(ch[c] / 255, 2);
+        return (Math.sqrt(diffuse * lit) * (1 - SHADOW_DARKNESS)).toFixed(5);
+      }).join(' ');
+    }
+
+    const SHADOW_VERTEX = [
+      'attribute vec3 position;',
+      'uniform mat4 modelMatrix;',
+      'uniform mat4 viewMatrix;',
+      'uniform mat4 projectionMatrix;',
+      'uniform mat4 modelViewProjectionMatrix;      // not used here; x3dom injects VR code that needs it',
+      'uniform vec3 light1;',
+      'uniform vec3 light2;',
+      'uniform float groundY;',
+      'uniform float light2Offset;',
+      'varying vec3 vLightSpace;     // shadow camera x, y and receiver depth',
+      'varying float vOccluderDepth;',
+      'varying float vViewDepth;',
+      'varying vec2 vGround;         // x, z on the ground',
+      'void main() {',
+      '  vec3 w = (modelMatrix * vec4(position, 1.0)).xyz;',
+      '  vec3 lp = light1;',
+      '  float h = groundY + 0.0005;',
+      '  if (w.y < -0.5 * light2Offset) { w.y += light2Offset; lp = light2; h = groundY + 0.001; }',
+      '  vec3 zc = normalize(lp);',
+      '  vec3 xc = normalize(cross(vec3(0.0, 1.0, 0.0), zc));',
+      '  vec3 yc = cross(zc, xc);',
+      '  float dist = length(lp);',
+      '  vec3 q = w + zc * ((h - w.y) / zc.y);          // along the light onto the ground',
+      '  vOccluderDepth = dist - dot(w, zc);',
+      '  vLightSpace = vec3(dot(q, xc), dot(q, yc), dist - dot(q, zc));',
+      '  vGround = q.xz;',
+      '  vec4 v = viewMatrix * vec4(q, 1.0);',
+      '  vViewDepth = -v.z;',
+      '  gl_Position = projectionMatrix * v;',
+      '}'
+    ].join('\n');
+
+    const SHADOW_FRAGMENT = [
+      '#ifdef GL_FRAGMENT_PRECISION_HIGH',
+      'precision highp float;',
+      '#else',
+      'precision mediump float;',
+      '#endif',
+      'uniform float camHalf;',
+      'uniform float camNear;',
+      'uniform float camFar;',
+      'uniform vec3 shadowColorA;    // on GROUND.colors[0] tiles',
+      'uniform vec3 shadowColorB;    // on GROUND.colors[1] tiles',
+      'uniform float tileSize;',
+      'uniform float groundHalf;',
+      'uniform vec3 fogColor;',
+      'uniform float fogNear;',
+      'uniform float fogFar;',
+      'varying vec3 vLightSpace;',
+      'varying float vOccluderDepth;',
+      'varying float vViewDepth;',
+      'varying vec2 vGround;',
+      'void main() {',
+      '  if (abs(vLightSpace.x) > camHalf || abs(vLightSpace.y) > camHalf || vLightSpace.z > camFar ||',
+      '      vOccluderDepth < camNear || vOccluderDepth > camFar) discard;',
+      '  // same tile layout as the ground texture: column from x, row from z (texture v runs along -z)',
+      '  float col = mod(floor((vGround.x + groundHalf) / tileSize), 2.0);',
+      '  float row = mod(floor((groundHalf - vGround.y) / tileSize), 2.0);',
+      '  vec3 shadowColor = (col == row) ? shadowColorA : shadowColorB;',
+      '  gl_FragColor = vec4(mix(shadowColor, fogColor, smoothstep(fogNear, fogFar, vViewDepth)), 1.0);',
+      '}'
+    ].join('\n');
+
+    // run fn once the inline's content is in the DOM (x3dom does not fire `load` for every inline)
+    function whenInlineReady(inline, fn) {
+      const t = setInterval(function () {
+        if (inline.querySelector('Shape, shape')) { clearInterval(t); fn(); }
+      }, 200);
+    }
+
+    function el(tag, attrs) {
+      const e = document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+      return e;
+    }
+
+    function buildShadows(modelPath) {
+      const root = document.getElementById('shadows');
+      const place = document.getElementById('modelPlace');
+      const caster = el('transform', {
+        DEF: 'shadowCaster',
+        translation: place.getAttribute('translation') || '0 0 0',
+        rotation: place.getAttribute('rotation') || '0 1 0 0',
+        scale: place.getAttribute('scale') || '1 1 1'
+      });
+      const unit = el('transform', { rotation: '1 0 0 1.5707963', scale: '39.370079 39.370079 39.370079' });
+      const inl = el('inline', { id: 'shadowInline', nameSpaceName: 'shadow', mapDEFToID: 'true' });
+      inl.setAttribute('url', modelPath);
+      whenInlineReady(inl, styleShadow);
+      unit.appendChild(inl);
+      caster.appendChild(unit);
+      root.appendChild(caster);
+
+      const second = el('transform', { translation: '0 ' + (-LIGHT2_OFFSET) + ' 0' });
+      second.appendChild(el('transform', { USE: 'shadowCaster' }));
+      root.appendChild(second);
+    }
+
+    function styleShadow() {
+      const fields = {
+        light1: SHADOW_LIGHTS[0].join(' '), light2: SHADOW_LIGHTS[1].join(' '),
+        groundY: String(cfg.groundY), light2Offset: String(LIGHT2_OFFSET),
+        camHalf: String(SHADOW_CAMERA.half), camNear: String(SHADOW_CAMERA.near), camFar: String(SHADOW_CAMERA.far),
+        shadowColorA: shadowColor(GROUND.colors[0]), shadowColorB: shadowColor(GROUND.colors[1]),
+        tileSize: String(GROUND.tile), groundHalf: String(GROUND.size / 2),
+        fogColor: hexToRGB(SKY.colors[SKY.colors.length - 1]),          // same as the <fog> colour
+        fogNear: String(cfg.fog[1]), fogFar: String(cfg.fog[2])
+      };
+      const types = { light1: 'SFVec3f', light2: 'SFVec3f', shadowColorA: 'SFVec3f', shadowColorB: 'SFVec3f', fogColor: 'SFVec3f' };
+      const inline = document.getElementById('shadowInline');
+      inline.querySelectorAll('Appearance, appearance').forEach(function (app) {
+        if (app.hasAttribute('USE')) return;
+        if (app.querySelector('ComposedShader, composedShader, composedshader')) return;
+        const sh = el('composedShader');
+        Object.keys(fields).forEach(function (k) {
+          sh.appendChild(el('field', { name: k, type: types[k] || 'SFFloat', value: fields[k] }));
+        });
+        const vs = el('shaderPart', { type: 'VERTEX' }); vs.textContent = SHADOW_VERTEX;
+        const fs = el('shaderPart', { type: 'FRAGMENT' }); fs.textContent = SHADOW_FRAGMENT;
+        sh.appendChild(vs); sh.appendChild(fs);
+        app.appendChild(sh);
+      });
+      inline.setAttribute('data-styled', 'true');
+    }
+
+    // no STL page for this model: centre it and size it to the view instead
+    function fitModel() {
+      const unit = document.getElementById('modelUnit')._x3domNode;
+      const v = unit && unit.getVolume();
+      if (!v || !v.isValid()) return false;
+      const size = Math.max(v.max.x - v.min.x, v.max.y - v.min.y, v.max.z - v.min.z);
+      const s = 1.2 / size;
+      const place = document.getElementById('modelPlace');
+      place.setAttribute('rotation', '0 1 0 0');
+      place.setAttribute('scale', s + ' ' + s + ' ' + s);
+      place.setAttribute('translation', [-(v.min.x + v.max.x) / 2 * s, cfg.groundY - v.min.y * s, -(v.min.z + v.max.z) / 2 * s].join(' '));
+      return true;
     }
 
     function loadModel() {
@@ -196,16 +571,29 @@
         return;
       }
 
-      const modelPath = MODEL_BASE_PATH + modelName + MODEL_EXTENSION;
+      cfg = window.MODEL_CONFIG[modelName] || DEFAULT_CONFIG;
+      applyConfig();
+
+      const modelPath = modelFolder(modelName) + modelName + MODEL_EXTENSION;
       const inlineElement = document.getElementById('modelInline');
 
-      if (inlineElement) {
-        inlineElement.setAttribute('url', modelPath);
-        console.log('成功載入模型：' + modelPath);
-      }
+      inlineElement.setAttribute('url', modelPath);
+      whenInlineReady(inlineElement, function () {
+        styleModel();
+        if (!window.MODEL_CONFIG[modelName]) {
+          const t = setInterval(function () { if (fitModel()) { clearInterval(t); buildShadows(modelPath); } }, 300);
+        }
+      });
+      if (window.MODEL_CONFIG[modelName]) buildShadows(modelPath);
+      console.log('成功載入模型：' + modelPath);
     }
 
-    window.addEventListener('load', loadModel);
+    window.addEventListener('resize', updateFieldOfView);
+    window.addEventListener('load', function () {
+      loadModel();
+      requestAnimationFrame(animate);
+    });
   </script>
 </body>
+
 </html>

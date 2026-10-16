@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE X3D PUBLIC "ISO//Web3D//DTD X3D 3.0//EN" "http://www.web3d.org/specifications/x3d-3.0.dtd">
+<X3D version="3.0" profile="Immersive" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance" xsd:noNamespaceSchemaLocation="http://www.web3d.org/specifications/x3d-3.0.xsd">
+	<head>
+		<meta name="filename" content="01-1.x3d" />
+		<meta name="generator" content="skp2x3d.py --mode assembly (DEF/USE from the SketchUp components)" />
+		<meta name="source" content="skp_模型/skp_模型/01_圖樣一/01-1 材.skp" />
+	</head>
+	<Scene>
+		<Transform DEF="SketchUp_TRANSFORM"
+		           translation="0.000000 0.000000 0.000000"
+		           scale="0.025400 0.025400 0.025400"
+		           rotation="-1.000000 0.000000 0.000000 1.570796"
+		           >
+			<Transform translation="26.705512 0 0" scale="0.6666 0.6666 0.6666">
+				<Shape DEF="c1">
+					<Appearance DEF="wood">
+						<Material diffuseColor="0.784 0.659 0.502" />
+					</Appearance>
+					<IndexedFaceSet solid="true" normalPerVertex="false"
+					                coordIndex="13 10 8 -1 10 13 15 -1 14 13 12 -1 13 14 15 -1 7 4 5 -1 4 7 6 -1 9 4 8 -1 4 9 5 -1 13 0 12 -1 0 13 1 -1 10 9 8 -1 9 10 11 -1 3 0 1 -1 0 3 2 -1 9 7 5 -1 7 9 11 -1 14 0 2 -1 0 14 12 -1 7 10 6 -1 10 7 11 -1 3 14 2 -1 14 3 15 -1 4 3 1 -1 3 4 6 -1"
+					                normalIndex="3 3 5 5 0 0 1 1 1 1 5 5 0 0 3 3 2 2 4 4 4 4 3 3">
+						<Coordinate point="0 0 0 0 0 5.9055 0 39.3701 0 0 39.3701 5.9055 1.1811 0 5.9055 1.1811 0 8.2677 1.1811 39.3701 5.9055 1.1811 39.3701 8.2677 2.7559 0 5.9055 2.7559 0 8.2677 2.7559 39.3701 5.9055 2.7559 39.3701 8.2677 3.937 0 0 3.937 0 5.9055 3.937 39.3701 0 3.937 39.3701 5.9055" />
+						<Normal vector="-1 0 0 0 -1 0 0 0 -1 0 0 1 0 1 0 1 0 0" />
+					</IndexedFaceSet>
+				</Shape>
+			</Transform>
+			<Transform translation="11.482677 0 0" scale="0.8333 0.8333 0.8333">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform translation="5.905512 0 0" scale="0.9166 0.9166 0.9166">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform translation="35.563386 0 0" scale="0.5 0.5 0.5">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform translation="31.298425 0 0" scale="0.5833 0.5833 0.5833">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform translation="16.73189 0 0" scale="0.8 0.8 0.8">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform translation="21.85 0 0" scale="0.7333 0.7333 0.7333">
+				<Shape USE="c1"/>
+			</Transform>
+			<Transform >
+				<Shape USE="c1"/>
+			</Transform>
+		</Transform>
+	</Scene>
+</X3D>
